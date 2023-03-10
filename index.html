@@ -6,6 +6,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nasa</title>
     <link rel="stylesheet" href="./style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script type="module">
+        import * as THREE from './three.js';
+        var POS_X = 1800;
+        var POS_Y = 500;
+        var POS_Z = 1800;
+        var WIDTH = 250;
+        var HEIGHT = 250;
+
+        var FOV = 45;
+        var NEAR = 1;
+        var FAR = 4000;
+        var light;
+        var sp;
+
+        // some global variables and initialization code
+        // simple basic renderer
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(WIDTH,HEIGHT);
+        renderer.setClearColor(0x111111, 0);
+
+        var mapDiv = document.getElementById("globe");
+        mapDiv.appendChild(renderer.domElement);
+
+        var camera = new THREE.PerspectiveCamera(FOV,WIDTH/HEIGHT,NEAR,FAR);
+        camera.position.set(POS_X,POS_Y, POS_Z);
+        camera.lookAt(new THREE.Vector3(0,0,0));
+        var scene = new THREE.Scene();
+        scene.add(camera);
+
+        $(document).ready(function()  {
+                addLights();
+                addEarth("images/lroc_color_poles_1k.jpg");
+                render();
+            });
+
+        function addLights() {
+            light = new THREE.DirectionalLight(0xFFFFFF, 1, 500 );
+            scene.add( light );
+            light.position.set(POS_X,POS_Y,POS_Z);
+        }
+
+        function addEarth(piccc) {
+            var spGeo = new THREE.SphereGeometry(600,50,50);
+            var planetTexture = new THREE.TextureLoader().load(piccc);
+            var mat2 =  new THREE.MeshPhongMaterial( {
+                map: planetTexture,
+                perPixel: false,
+                shininess: 0.2 } );
+            sp = new THREE.Mesh(spGeo,mat2);
+            scene.add(sp);
+
+        }
+
+        function render() {
+            var timer = Date.now() * 0.0001;
+            camera.position.x = (Math.cos( timer ) *  1800);
+            camera.position.z = (Math.sin( timer ) *  1800);
+            camera.lookAt( scene.position );
+            light.position.set(camera.position.x,camera.position.y,camera.position.z);
+            light.lookAt(scene.position);
+            renderer.render( scene, camera );
+            requestAnimationFrame( render );
+        }
+    </script>
 </head>
 <body>
 
@@ -24,8 +89,8 @@
             <p>Space Station Benefits to Humanity</p>
             <button>Learn More</button>
         </div>
-        <div class="image-section1">
-            <img src="images/moon.png" width="500" height="auto">
+        <div id="globe" class="image-section1">
+            <!-- <img src="images/moon.png" width="500" height="auto"> -->
         </div>
 
     </div>
